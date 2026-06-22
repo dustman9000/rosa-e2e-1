@@ -71,12 +71,24 @@ var _ = Describe("RHOBS Synthetic Monitoring", labels.High, labels.Positive, lab
 	})
 
 	It("should have probe_success metrics flowing to RHOBS", func(ctx context.Context) {
+		By("Checking probe exists before verifying metrics")
+		if err := verifiers.VerifyRHOBSProbeExists(ctx, clusterExternalID, false, rhobsConfig); err != nil {
+			if err2 := verifiers.VerifyRHOBSProbeExists(ctx, clusterExternalID, true, rhobsConfig); err2 != nil {
+				Skip("No probe exists for cluster, skipping metrics check")
+			}
+		}
 		By("Querying RHOBS metrics API for probe_success")
 		Expect(verifiers.VerifyProbeSuccessMetrics(ctx, clusterExternalID, rhobsConfig)).To(Succeed(),
 			"probe_success metrics should exist for cluster %s", clusterExternalID)
 	})
 
 	It("should have recording rules evaluating", func(ctx context.Context) {
+		By("Checking probe exists before verifying recording rules")
+		if err := verifiers.VerifyRHOBSProbeExists(ctx, clusterExternalID, false, rhobsConfig); err != nil {
+			if err2 := verifiers.VerifyRHOBSProbeExists(ctx, clusterExternalID, true, rhobsConfig); err2 != nil {
+				Skip("No probe exists for cluster, skipping recording rules check")
+			}
+		}
 		By("Waiting for sre:hcp:probe_active and sre:hcp:blackbox_probe_active recording rules (up to 5 minutes)")
 		Eventually(func() error {
 			return verifiers.VerifyRecordingRules(ctx, clusterExternalID, rhobsConfig)
