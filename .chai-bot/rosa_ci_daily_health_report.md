@@ -166,18 +166,25 @@ Before creating a ticket, search Jira for existing open issues that already cove
 The `ci-status-jobs.yaml` config includes `team` and `labels` fields per category (and optionally per job). Use these directly:
 - `team.id` maps to the Jira Team field (`customfield_10001`)
 - `team.name` is for display only
+- `team.slack_channel` is the team's Slack channel for notifications
+- `team.slack_alias` is the team's Slack user group handle (e.g., `@sd-srep-team-hulk`)
 - `labels` is the list of Jira labels to apply
 - Job-level `team` and `labels` override category-level when present
 
 If a category or job has no `team` field, fall back to ROSA CI (`97412673-7d28-430b-bdee-ce3d1eb702b2`) with label `ci-failure`.
 
+**Team notifications:** When creating a Jira ticket, also post a notification to the team's `slack_channel` (if defined) mentioning the `slack_alias` (if defined). Keep the notification brief: link to the Jira ticket and a one-line summary of the failure.
+
 For OCM FVT failures, also check cs-telemetry to determine if the failure is CS-side (API errors, timeouts) vs test-side (assertion errors, framework issues). If test-side, use ROSA CI team instead of the category's team.
+
+**Jira components:** The `components` field in ci-status-jobs.yaml maps directly to ROSAENG Jira component names (e.g., `clusters-service`, `rosa-cli`, `route-monitor-operator`, `terraform-provider-rhcs`). Set the Jira `components` field when the category has a `components` list. For `platform` or `upstream` scoped categories (rosa-e2e, gap-analysis, conformance), omit the component.
 
 **Ticket format:**
 - Type: Bug
 - Summary: `[ci-failure] <Job display name>: <brief failure description>`
 - Priority: Major (persistent) or Minor (intermittent)
 - Parent epic: ROSAENG-391
+- Components: from the `components` field in ci-status-jobs.yaml (if present)
 - Labels: from the `labels` field in ci-status-jobs.yaml
 - Description: include the diagnosis from the threaded reply, links to failing Prow runs, and any cs-telemetry findings
 - Security Level: Red Hat Employee (id: 10034)
