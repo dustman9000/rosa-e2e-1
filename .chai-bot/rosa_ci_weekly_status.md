@@ -48,7 +48,7 @@ Use GitHub tools or `fetch_web_content` to find PRs from the last 7 days. Includ
 Post the report as your channel response. Format:
 
 ```
-:fyi: *ROSA CI Weekly Status ({MM/DD})*
+:fyi: *ROSA CI Weekly Status ({MM/DD}) -- {overall_7d_rate}%*
 <https://redhat.atlassian.net/browse/ROSA-727|*ROSA-727*> Epics:
 <https://redhat.atlassian.net/browse/ROSAENG-391|*ROSAENG-391*>: %X%% (%CLOSED%/%TOTAL% closed, %IN_PROGRESS% in progress)
 {other active epics with similar format}
@@ -67,6 +67,9 @@ Post the report as your channel response. Format:
 ```
 
 ### Formatting rules
+
+**Title:**
+- `{overall_7d_rate}` is the weighted pass rate across all jobs with 7-day data (total passes / total builds, rounded to nearest integer).
 
 **Job health section:**
 - Group jobs by health tier (:large_green_circle: first, then :large_yellow_circle:, then :red_circle:)
