@@ -23,6 +23,10 @@ For each job in the registry, use Prow CI tools (`search_prow_jobs`, `query_prow
 
 If Prow tools don't return historical build data directly, use `fetch_web_content` to retrieve the job-history page at `https://prow.ci.openshift.org/job-history/gs/test-platform-results/logs/{JOB_NAME}`. The HTML contains `var allBuilds = [{ID, Result, Started, Duration}];`.
 
+**Important: fetch ALL categories.** There are 13 categories with ~139 total jobs. Process every category completely. If a fetch fails or times out for a specific job, mark that job as "fetch error" (not "no runs") and continue with the next job. Do not skip entire categories due to fetch issues. A category should only show "no runs" if every job in it genuinely returned zero completed builds in the data, not because the fetch failed.
+
+If you are running low on time or resources, prioritize categories in this order: categories with the most jobs first (staging categories), then integration, then production.
+
 ### 3. Compute pass rates and trends
 
 **Per-category pass rate**: aggregate pass/fail across all jobs in each category.
@@ -76,7 +80,20 @@ _{N} categories skipped (no runs) · <https://sippy.dptools.openshift.org/sippy-
 
 ### 5. Failure analysis (threaded replies)
 
-After posting the top-level summary, use `post_thread_update` to post **separate threaded replies** for each category below 80%. One reply per failing category. Each call to `post_thread_update` creates a new message in the thread under your top-level summary.
+After the top-level summary, include **separate threaded replies** for each category below 80% using the delimiter-based threading system. Put `---THREAD_DETAILS---` after your main summary, then each threaded reply separated by `---THREAD_BREAK---`. One reply per failing category.
+
+Example structure:
+```
+{top-level summary content}
+
+---THREAD_DETAILS---
+
+{first category failure analysis}
+
+---THREAD_BREAK---
+
+{second category failure analysis}
+```
 
 For each failing job in the category:
 1. Fetch the build log from the most recent failure using Prow CI tools or `fetch_web_content` on the artifacts URL
@@ -116,7 +133,7 @@ These are patterns that come up often. Use them as hints, not a rigid checklist.
 
 ### 6. Auto-fix (for pattern-matched failures)
 
-After completing the failure analysis, check if any failures match fixable patterns. Use `post_thread_update` to post the results as another threaded reply.
+After completing the failure analysis, check if any failures match fixable patterns. Add a `---THREAD_BREAK---` section to post the results as another threaded reply.
 
 **Conformance skip list pattern:**
 If a conformance test (HCP or Classic STS) is failing persistently (3+ consecutive failures) and the failing test is in an OCP-owned sig (sig-apps, sig-auth, sig-network, sig-storage), AND the same test is NOT failing in rosa-e2e HCP/STS jobs (confirming it's upstream, not ROSA-specific):
@@ -130,7 +147,7 @@ If a conformance test (HCP or Classic STS) is failing persistently (3+ consecuti
 5. Scan the diff for sensitive content (credentials, IP addresses, account IDs) before pushing
 6. Open a PR with title `[ci-fix] Skip <test-name> in <workflow> (upstream OCP regression)`
 7. PR description must link to the failing Prow job run(s) and reference the upstream OCP bug if identifiable
-8. Use `post_thread_update` to post a threaded reply with the PR link
+8. Add a `---THREAD_BREAK---` section to post a threaded reply with the PR link
 
 **PR shepherding:**
 After opening a PR (or if a `[ci-fix]` PR is already open from a previous run), shepherd it through CI:
@@ -192,7 +209,7 @@ For OCM FVT failures, also check cs-telemetry to determine if the failure is CS-
 - Only create tickets for persistent failures (3+ consecutive), not intermittent flakes
 - Always search for existing open tickets first to avoid duplicates
 
-Use `post_thread_update` to post a threaded reply noting the created ticket with a link.
+Add a `---THREAD_BREAK---` section to post a threaded reply noting the created ticket with a link.
 
 ## Constraints
 
