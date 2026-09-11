@@ -221,12 +221,12 @@ After posting the health report and writing the artifact, attempt **one** auto-f
 **Auto-fixable patterns** (in priority order — all four classification buckets are fixable):
 1. **Conformance skip list** — failing OCP conformance tests → add to skip list in `openshift-online/rosa-e2e`
 2. **Test code bug** — test assertion or setup error → fix in the test repo
-3. **CI config / step registry** — workflow or step misconfiguration → fix in `openshift/release`
+3. **CI infra / config** — step-registry ref changes, ci-operator config fixes, cluster profile updates, image reference fixes, workflow YAML corrections → fix in `openshift/release`; test framework configuration, test harness setup, helper scripts → fix in `openshift-online/rosa-e2e`, `openshift-online/rosa-backend-tests`, or `openshift-online/rosa-gap-analysis`
 4. **ROSA CLI test fix** — CLI test failure due to changed behavior → fix in `openshift/rosa`
 5. **SRE operator fix** — operator test/config issue → fix in the relevant SRE operator repo
 6. **Log / artifact improvement** — failure analysis couldn't reach root cause without inference → PR to add missing gather step, `oc describe`/`logs`/`get events`, or CR status dump to the step-registry ref or test harness
 7. **Env/config fix** — expired tokens → config rotation or credential refresh PR; VPC quota exhaustion → cleanup step or resource limit PR; staging connectivity → endpoint config or retry logic PR; version enablement gap → version gate update or skip list PR
-8. **Product bug workaround** — if the product bug has a test-side workaround (skip, conditional assertion, version gate), open the workaround PR and link the upstream Jira. Only fall back to Jira-only when the fix genuinely requires upstream product code changes the bot cannot make
+8. **Product bug fix** — product bugs are auto-fixable when the fix is low-hanging fruit (e.g., simple code change, obvious nil check, missing error handling, straightforward logic fix). If the product repo is in the allowed list, open the fix PR directly and link the upstream Jira. If the fix is test-side (skip, conditional assertion, version gate), open the workaround PR and link the Jira. Only escalate to Jira-only when the fix requires deep domain expertise, architectural changes, or cross-component coordination that the bot can't safely attempt
 
 **Allowed target repos** (repos with `scm_create_change_request` grants on this persona):
 
@@ -237,7 +237,7 @@ After posting the health report and writing the artifact, attempt **one** auto-f
 `rosa-account-manager-service`, `rosa-backend-tests`, `rosa-clusters-service`, `rosa-e2e`, `rosa-eng-dashboard`, `rosa-external-tests`, `rosa-gap-analysis`, `rosa-service-log`
 
 *gitlab.cee.redhat.com:*
-`service/app-interface`, `service/backplane-api`, `service/osd-rhobs-rules-and-dashboards`, `service/uhc-clusters-service`, `releng/konflux-release-data`
+`service/app-interface`, `service/backplane-api`, `service/clusterimagesets`, `service/osd-rhobs-rules-and-dashboards`, `service/uhc-clusters-service`, `releng/konflux-release-data`
 
 **Process:**
 1. Fetch the build log for the selected failure
