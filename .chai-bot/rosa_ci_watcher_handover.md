@@ -182,3 +182,83 @@ Post one Slack message to the `#wg-rosa-cicd` channel. Use Slack `mrkdwn` format
 - Keep the message under 2500 characters. The message should be a handover brief, not a report. If there are too many items, summarize and link to the Jira filter.
 - Verify PR merge status before claiming "merged."
 - Do not include the `[Scheduled task: ...]` metadata line in the output.
+
+---
+
+## Monthly schedule maintenance (first week of month only)
+
+Run this step only if today's day-of-month in UTC is between 1 and 7 (i.e., this is the first Monday handover of the month). Otherwise skip entirely.
+
+### Goal
+
+Keep `data/teams/sd-sre/schedules/rosa-ci-watcher.yml` in app-interface in sync with the current ROSA org. The schedule should include all ICs in the ROSA org except PMs, HyperFleet members, and GovCloud/FedRAMP members.
+
+### 1. Read the current schedule
+
+Fetch the current schedule from app-interface:
+`https://gitlab.cee.redhat.com/service/app-interface/-/raw/master/data/teams/sd-sre/schedules/rosa-ci-watcher.yml`
+
+Extract the list of `$ref` paths currently in the schedule.
+
+### 2. Read the eligible IC pool from hybrid-platforms/org
+
+Fetch all team YAML files under `config/structures/hybrid_platforms/rosa/teams/` from the hybrid-platforms/org GitLab repo (`https://gitlab.cee.redhat.com/hybrid-platforms/org`).
+
+**Exclude these teams entirely:**
+- `rosa_hyperfleet`
+- `rosa_trust_fedramp_core`
+- `rosa_trust_govcloud_sre`
+
+For the remaining teams, collect kerberos IDs from two sources:
+
+1. **Explicit role listings**: people in `roles[].people.ids` whose role type is NOT `manager`, `product_manager`, or `program_manager`. Include `staff_engineer` and `team_lead` role types — these are senior ICs, not managers.
+
+2. **LDAP-resolved teams**: for teams that use `group.people.select` without an explicit IC role listing, get the current members from the Jira team page linked in `resources[name=Jira Team].url`. Fetch member account IDs via the Atlassian API and resolve kerberos IDs via LDAP: `ldapsearch -x -H ldap://ldap.corp.redhat.com -b "ou=users,dc=redhat,dc=com" "(displayName=FULL NAME)" uid`. Exclude anyone who appears in the team's `roles[]` with a manager, product_manager, or program_manager type.
+
+Also include `staff_engineer` IDs from the top-level `config/structures/hybrid_platforms/rosa/org.yaml` — these are cross-cutting ICs who should be in the pool.
+
+### 3. Map kerberos IDs to app-interface $ref paths
+
+For each kerberos ID in the eligible pool, find their user YAML file in app-interface. Search `data/teams/*/users/` for files matching the kerberos ID (e.g., `drow.yml`, `drow.yaml`). Use the GitLab API to search:
+`GET /api/v4/projects/service%2Fapp-interface/repository/tree?path=data/teams/{team}/users&ref=master`
+
+Try common teams first: `sd-sre`, `ocm`, then search others if not found. Construct the `$ref` as `/teams/{team}/users/{kerberos-id}.{ext}`.
+
+For any kerberos ID where no app-interface user file can be found, add it to a separate **unresolved set** — do not drop it silently. These are reported regardless of whether an MR is opened.
+
+### 4. Compute the diff
+
+Build two sets from step 3:
+- **Resolved pool**: `$ref` paths for kerberos IDs with confirmed app-interface files
+- **Unresolved**: kerberos IDs with no app-interface file found
+
+Before comparing, extract the kerberos ID from each current schedule `$ref` path by taking the filename without extension (e.g., `/teams/sd-sre/users/drow.yml` -> `drow`). This normalizes both sets to the same key space.
+
+Compare the resolved pool's `$ref` set with the current schedule's `$ref` set:
+- **To add**: in resolved pool but not in any schedule entry
+- **To remove**: schedule entry whose kerberos ID is NOT in the resolved pool AND NOT in the unresolved set
+
+**Do not remove a person from the schedule if their kerberos ID is in the unresolved set** — a failed lookup is not confirmation they left the org. Only remove entries when the person is confirmed absent from the eligible pool (their team was excluded or their role type is excluded).
+
+If there are no additions and no removals, skip to step 6 (no MR needed) — but still report unresolved IDs if any.
+
+### 5. Generate the updated schedule and open an MR
+
+Clone the app-interface repo (`https://gitlab.cee.redhat.com/service/app-interface`), create a branch named `rosa-ci-watcher-{YYYY-MM}`, and update the schedule file:
+
+- Remove entries for people no longer in the pool. If their scheduled week is in the future, remove the entry; if it's already past, leave it.
+- Append new entries for added people at the end of the schedule, each one week after the last existing entry, continuing the Monday 09:00 UTC cadence.
+- Update the comment on line 13 to reflect the new IC count.
+
+Commit with message: `rosa-ci-watcher: monthly rotation pool update ({MONTH} {YEAR})`
+
+Open an MR against `master` targeting `service/app-interface` with title:
+`rosa-ci-watcher: monthly rotation pool update ({MONTH} {YEAR})`
+
+### 6. Report in Slack
+
+Add a line to the handover message (or post a threaded reply if the main message is near the character limit):
+
+- If an MR was opened: `:calendar: *Monthly schedule update:* Added {N}, removed {M} — <{mr_url}|MR !{number}>. Unresolved (no app-interface file): {list or "none"}.`
+- If no changes: `:calendar: *Monthly schedule check:* pool unchanged, no MR needed. Unresolved (no app-interface file): {list or "none"}.`
+- If this is not the first week of the month: omit entirely.
