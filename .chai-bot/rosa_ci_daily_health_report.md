@@ -216,13 +216,17 @@ After posting the health report and writing the artifact, attempt **one** auto-f
 
 **Scope:** From the jobs analyzed in step 5, pick the single failure with the highest `consecutive_failures` that matches an auto-fixable pattern. Skip jobs that already have an open `[rosa-ci-fix]` PR.
 
-**Auto-fixable patterns** (in priority order):
+**Fallback for unanalyzed categories:** If no auto-fixable failure is found from the step 5 analysis, fetch the build log for the single highest `consecutive_failures` unanalyzed job (from the categories not covered in step 5), classify it using the 4-bucket system, and attempt a fix if it matches any auto-fixable pattern. This is one extra log fetch, not a full sweep.
+
+**Auto-fixable patterns** (in priority order — all four classification buckets are fixable):
 1. **Conformance skip list** — failing OCP conformance tests → add to skip list in `openshift-online/rosa-e2e`
 2. **Test code bug** — test assertion or setup error → fix in the test repo
 3. **CI config / step registry** — workflow or step misconfiguration → fix in `openshift/release`
 4. **ROSA CLI test fix** — CLI test failure due to changed behavior → fix in `openshift/rosa`
 5. **SRE operator fix** — operator test/config issue → fix in the relevant SRE operator repo
 6. **Log / artifact improvement** — failure analysis couldn't reach root cause without inference → PR to add missing gather step, `oc describe`/`logs`/`get events`, or CR status dump to the step-registry ref or test harness
+7. **Env/config fix** — expired tokens → config rotation or credential refresh PR; VPC quota exhaustion → cleanup step or resource limit PR; staging connectivity → endpoint config or retry logic PR; version enablement gap → version gate update or skip list PR
+8. **Product bug workaround** — if the product bug has a test-side workaround (skip, conditional assertion, version gate), open the workaround PR and link the upstream Jira. Only fall back to Jira-only when the fix genuinely requires upstream product code changes the bot cannot make
 
 **Allowed target repos** (repos with `scm_create_change_request` grants on this persona):
 
@@ -241,6 +245,8 @@ After posting the health report and writing the artifact, attempt **one** auto-f
 2b. **Check for existing Jira** — before filing a new ticket or opening a fix PR, search ROSAENG for an existing open issue covering this failure (by job name or error signature). If found, link to it and skip creating a duplicate.
 3. If fixable: spin up a workspace, write the fix, push, open a PR with `[rosa-ci-fix]` in the title
 4. If NOT fixable after diagnosis: note it in the report as "investigated, not auto-fixable — [reason]"
+
+**Bias to action:** Always attempt the fix. If the change is complex, open a smaller-scoped PR addressing the specific failure (a skip-list entry, a version gate, a timeout increase). Let PR reviewers judge safety — do not self-censor based on perceived risk or complexity. The PR review process (CodeRabbit + human `/approve`) is the safety net, not your judgment about whether a fix is "too risky."
 
 **Constraints:**
 - Maximum **1 PR per run** — if multiple failures are fixable, pick only the highest priority one
