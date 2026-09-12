@@ -33,6 +33,8 @@ If more than 3 consecutive failures, escalate.
 From the most recent **successful** controller run, fetch `artifacts/rosa-cluster-lease-controller/rosa-cluster-lease-controller/artifacts/controller-report.txt` from GCS at:
 `https://storage.googleapis.com/test-platform-results/logs/{JOB_NAME}/{BUILD_ID}/artifacts/rosa-cluster-lease-controller/rosa-cluster-lease-controller/artifacts/controller-report.txt`
 
+If no successful run exists in the 6-hour window, escalate using the latest failed run. Mark the controller report as unavailable and skip report-based analysis.
+
 Parse the report for:
 - Cluster inventory (name, status, env, type)
 - Unhealthy clusters and their error reasons
@@ -55,7 +57,7 @@ Classify each problem into one of:
 | **credential-issue** | Escalate to DPTP / secret owner | GSM bundle resolution failure, expired OCM token |
 | **provisioning-failure** | Check OIDC config, AWS IAM roles, GCP credentials | ARN not found, account role missing |
 | **cluster-health** | Check OCM cluster state, node health | Cluster in error/uninstalling state in OCM |
-| **stale-inventory** | Clear error state if cluster is actually healthy | False-positive from broken health check |
+| **stale-inventory** | Trigger controller reconciliation or open a controller-fix PR | False-positive from broken health check |
 | **infra-transient** | No action if not recurring | One-off pod scheduling failure |
 
 ### 5. Auto-remediation
@@ -63,6 +65,7 @@ Classify each problem into one of:
 For issues you can fix directly:
 
 **Controller/health script bugs** (`openshift/release`):
+- Before creating a PR, search for existing open PRs with the same `[ci-fix] rosa-cluster-lease:` prefix. If one exists for the same issue, update or comment on it instead of opening a duplicate.
 - Fix the script in `ci-operator/step-registry/rosa/cluster-lease/`
 - Open a PR with title format: `[ci-fix] rosa-cluster-lease: <brief description>`
 - Run `make jobs` if any YAML config files changed
