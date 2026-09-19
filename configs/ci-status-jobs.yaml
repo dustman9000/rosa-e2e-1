@@ -13,6 +13,15 @@
 #   platform:  Tests the managed service platform as a whole. CI health from
 #              platform tests contributes to every component's health indicator.
 #   upstream:  Tests upstream OCP/HyperShift. Shown in exec summary only.
+#
+# gating: true marks a category or job as a production release gate: its
+#   staging results block promotion of the release bundle (bundle.yaml) to
+#   production. Set at category level = every job in the category gates. Set at
+#   job level = only that job gates (used where a category mixes gating and
+#   non-gating jobs, e.g. STG vs INT promotion jobs). A job-level gating value
+#   overrides the category default, so gating: false opts a single job out of a
+#   gating category. Jobs without gating are informational signal only.
+#   Tracked in ROSAENG-62472.
 
 sippy_url: https://sippy.dptools.openshift.org/sippy-ng/release/rosa-stage
 
@@ -39,6 +48,7 @@ categories:
   - id: rosa-e2e-stg
     scope: platform
     name: ROSA E2E STG
+    gating: true
     prow_filter: "https://prow.ci.openshift.org/?repo=openshift-online%2Frosa-e2e&type=periodic&job=*rosa-e2e-main-periodics-*"
     team:
       id: "97412673-7d28-430b-bdee-ce3d1eb702b2"
@@ -149,6 +159,7 @@ categories:
     scope: component
     components: [clusters-service]
     name: OCM FVT HCP STG
+    gating: true
     team:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
@@ -181,6 +192,7 @@ categories:
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-y-upgrade-staging-main
       - name: HCP n-X Y-Upgrade
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-nx-y-upgrade-staging-main
+        gating: false  # opted out until it produces runs (daily cron but no GCS builds yet)
       - name: HCP Zero Egress
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-zero-egress-staging-main
       - name: HCP Zero Egress Upgrade
@@ -232,6 +244,7 @@ categories:
     scope: component
     components: [clusters-service]
     name: OCM FVT Classic STG
+    gating: true
     team:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
@@ -282,6 +295,7 @@ categories:
     scope: component
     components: [clusters-service]
     name: OCM FVT GCP STG
+    gating: true
     team:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
@@ -324,6 +338,7 @@ categories:
     scope: component
     components: [osd-fleet-manager]
     name: OCM FVT OSDFM STG
+    gating: true
     team:
       id: "bd8a0aae-863d-4ea3-a697-028b5043fc08"
       name: ROSA Fleet Manager
@@ -466,30 +481,35 @@ categories:
         labels: [route-monitor-operator]
       - name: RMO Promotion STG
         prow_job: periodic-ci-openshift-route-monitor-operator-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [route-monitor-operator]
       - name: CAMO Promotion INT
         prow_job: periodic-ci-openshift-configure-alertmanager-operator-master-rosa-sts-e2e-promotion-int
         labels: [configure-alertmanager-operator]
       - name: CAMO Promotion STG
         prow_job: periodic-ci-openshift-configure-alertmanager-operator-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [configure-alertmanager-operator]
       - name: AVO Promotion INT
         prow_job: periodic-ci-openshift-aws-vpce-operator-main-rosa-sts-e2e-promotion-int
         labels: [aws-vpce-operator]
       - name: AVO Promotion STG
         prow_job: periodic-ci-openshift-aws-vpce-operator-main-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [aws-vpce-operator]
       - name: MUO Promotion INT
         prow_job: periodic-ci-openshift-managed-upgrade-operator-master-rosa-sts-e2e-promotion-int
         labels: [managed-upgrade-operator]
       - name: MUO Promotion STG
         prow_job: periodic-ci-openshift-managed-upgrade-operator-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [managed-upgrade-operator]
       - name: OAO Promotion INT
         prow_job: periodic-ci-openshift-ocm-agent-operator-master-rosa-sts-e2e-promotion-int
         labels: [ocm-agent-operator]
       - name: OAO Promotion STG
         prow_job: periodic-ci-openshift-ocm-agent-operator-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [ocm-agent-operator]
       - name: OME Promotion INT
         prow_job: periodic-ci-openshift-osd-metrics-exporter-main-rosa-sts-e2e-promotion-int
@@ -497,6 +517,7 @@ categories:
           - osd-metrics-exporter
       - name: OME Promotion STG
         prow_job: periodic-ci-openshift-osd-metrics-exporter-main-rosa-sts-e2e-promotion-stage
+        gating: true
         labels:
           - osd-metrics-exporter
       - name: SFO Promotion INT
@@ -504,36 +525,42 @@ categories:
         labels: [splunk-forwarder-operator]
       - name: SFO Promotion STG
         prow_job: periodic-ci-openshift-splunk-forwarder-operator-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [splunk-forwarder-operator]
       - name: Certman Promotion INT
         prow_job: periodic-ci-openshift-certman-operator-master-hive-e2e-promotion-int
         labels: [certman-operator]
       - name: Certman Promotion STG
         prow_job: periodic-ci-openshift-certman-operator-master-hive-e2e-promotion-stage
+        gating: true
         labels: [certman-operator]
       - name: CIO Promotion INT
         prow_job: periodic-ci-openshift-cloud-ingress-operator-master-rosa-osd-aws-e2e-promotion-int
         labels: [cloud-ingress-operator]
       - name: CIO Promotion STG
         prow_job: periodic-ci-openshift-cloud-ingress-operator-master-rosa-osd-aws-e2e-promotion-stage
+        gating: true
         labels: [cloud-ingress-operator]
       - name: RPO Promotion INT
         prow_job: periodic-ci-openshift-rbac-permissions-operator-master-rosa-sts-e2e-promotion-int
         labels: [rbac-permissions-operator]
       - name: RPO Promotion STG
         prow_job: periodic-ci-openshift-rbac-permissions-operator-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [rbac-permissions-operator]
       - name: AAO Promotion INT
         prow_job: periodic-ci-openshift-aws-account-operator-master-hive-e2e-promotion-int
         labels: [aws-account-operator]
       - name: AAO Promotion STG
         prow_job: periodic-ci-openshift-aws-account-operator-master-hive-e2e-promotion-stage
+        gating: true
         labels: [aws-account-operator]
       - name: MCVW Promotion INT
         prow_job: periodic-ci-openshift-managed-cluster-validating-webhooks-master-rosa-sts-e2e-promotion-int
         labels: [managed-cluster-validating-webhooks]
       - name: MCVW Promotion STG
         prow_job: periodic-ci-openshift-managed-cluster-validating-webhooks-master-rosa-sts-e2e-promotion-stage
+        gating: true
         labels: [managed-cluster-validating-webhooks]
       # OSD GCP
       - name: RMO GCP INT
@@ -541,30 +568,35 @@ categories:
         labels: [route-monitor-operator]
       - name: RMO GCP STG
         prow_job: periodic-ci-openshift-route-monitor-operator-master-osd-gcp-e2e-promotion-stage
+        gating: true
         labels: [route-monitor-operator]
       - name: CAMO GCP INT
         prow_job: periodic-ci-openshift-configure-alertmanager-operator-master-osd-gcp-e2e-promotion-int
         labels: [configure-alertmanager-operator]
       - name: CAMO GCP STG
         prow_job: periodic-ci-openshift-configure-alertmanager-operator-master-osd-gcp-e2e-promotion-stage
+        gating: true
         labels: [configure-alertmanager-operator]
       - name: MUO GCP INT
         prow_job: periodic-ci-openshift-managed-upgrade-operator-master-osd-gcp-e2e-promotion-int
         labels: [managed-upgrade-operator]
       - name: MUO GCP STG
         prow_job: periodic-ci-openshift-managed-upgrade-operator-master-osd-gcp-e2e-promotion-stage
+        gating: true
         labels: [managed-upgrade-operator]
       - name: OAO GCP INT
         prow_job: periodic-ci-openshift-ocm-agent-operator-master-osd-gcp-e2e-promotion-int
         labels: [ocm-agent-operator]
       - name: OAO GCP STG
         prow_job: periodic-ci-openshift-ocm-agent-operator-master-osd-gcp-e2e-promotion-stage
+        gating: true
         labels: [ocm-agent-operator]
       - name: SFO GCP INT
         prow_job: periodic-ci-openshift-splunk-forwarder-operator-master-osd-gcp-e2e-promotion-int
         labels: [splunk-forwarder-operator]
       - name: SFO GCP STG
         prow_job: periodic-ci-openshift-splunk-forwarder-operator-master-osd-gcp-e2e-promotion-stage
+        gating: true
         labels: [splunk-forwarder-operator]
 
   - id: terraform-provider-rhcs-jobs
