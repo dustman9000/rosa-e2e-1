@@ -46,7 +46,7 @@ If Prow tools don't return historical build data directly, use `fetch_web_conten
 
 **Consecutive failures**: For each job, examine the build history in reverse chronological order (most recent first). Count how many builds failed consecutively from the most recent build backward until a passing build is found. This count is `consecutive_failures`. If the most recent build passed, `consecutive_failures` is 0. If all builds in the window failed, `consecutive_failures` equals the total number of builds. Example: builds [FAIL, FAIL, FAIL, PASS, FAIL, PASS, PASS] → consecutive_failures = 3 (the three most recent are failures).
 
-**Gating vs non-gating pass rate**: The registry marks production release-gating jobs with a `gating` field (see the header doc in `ci-status-jobs.yaml`). A job gates if its category sets `gating: true`, unless the job sets its own `gating` value, which overrides the category default (so a job-level `gating: false` opts that single job out of a gating category). Aggregate two separate weighted pass rates across all jobs with data: one for gating jobs, one for non-gating jobs (total passes / total builds each, rounded to nearest integer). The gating rate is the number ROSAENG-62472 tracks against a 95% target. Jobs with no data are excluded from both, same as the overall rate.
+**Gating vs non-gating pass rate**: The registry marks production release-gating jobs with a `gating` field (see the header doc in `ci-status-jobs.yaml`). A job gates if its category sets `gating: true`, unless the job sets its own `gating` value, which overrides the category default (so a job-level `gating: false` opts that single job out of a gating category). Aggregate two separate weighted pass rates across all jobs with data: one for gating jobs, one for non-gating jobs (total passes / total builds each, rounded to nearest integer). Jobs with no data are excluded from both, same as the overall rate.
 
 ### 4. Channel response (top-level summary)
 
@@ -65,8 +65,8 @@ Post a concise summary as your channel response. This is the top-level message t
 
 ```
 *ROSA CI Daily Health -- {DATE} -- {overall_rate}%*
-*Gating:* {gating_rate}% ({gating_pass}/{gating_total}) {gating_trend} · target 95% · <https://redhat.atlassian.net/browse/ROSAENG-62472|ROSAENG-62472>
-*Non-gating:* {non_gating_rate}% ({non_gating_pass}/{non_gating_total}) {non_gating_trend}
+*Gating:* {gating_rate}% ({gating_pass}/{gating_total}) -- {gating_trend}
+*Non-gating:* {non_gating_rate}% ({non_gating_pass}/{non_gating_total}) -- {non_gating_trend}
 
 {emoji} *{Category}:* {rate}% ({pass}/{total}) {trend} (<prow_filter|jobs>)
 {emoji} *{Category}:* {rate}% ({pass}/{total}) {trend} -- {brief inline note} (<prow_filter|jobs>)
@@ -77,7 +77,7 @@ _{N} categories skipped (no runs) · <https://sippy.dptools.openshift.org/sippy-
 
 **Rules:**
 - `{overall_rate}` is the weighted pass rate across all jobs with data (total passes / total builds, rounded to nearest integer).
-- The two-line gating rollup goes directly under the header, before the per-category list. `{gating_rate}` is the weighted pass rate across gating jobs with data; `{non_gating_rate}` across non-gating jobs with data (see "Gating vs non-gating pass rate" in step 3). Always include both lines. Add the same 7-day trend emoji used for categories. Keep the `target 95%` and `ROSAENG-62472` link on the gating line only.
+- The two-line gating rollup goes directly under the header, before the per-category list. `{gating_rate}` is the weighted pass rate across gating jobs with data; `{non_gating_rate}` across non-gating jobs with data (see "Gating vs non-gating pass rate" in step 3). Always include both lines. Add the same 7-day trend emoji used for categories.
 - List categories with data, sorted by pass rate descending. **One category per line.** Never combine multiple categories on the same line with `·` separators. Every category gets its own line with its own emoji, pass rate, trend, and (jobs) link, even green categories.
 - For yellow/red categories, add a **short** inline note after the trend emoji (e.g., `-- AMD64 & E2E at 40%`, `-- stale since Jun 17`, `-- 1 run in 30d`). Keep notes under 40 characters.
 - If any categories had zero Prow run data, mention the count in the footer line (e.g., `2 categories skipped (no runs)`). Omit this part if all categories have data.
@@ -210,7 +210,7 @@ categories:
 
 **Field notes:**
 - Include **ALL** categories and **ALL** jobs, not just failing ones. The remediation follow-ups need the full picture.
-- `gating_pass_rate` / `non_gating_pass_rate`: the two weighted pass rates from step 3. The gating rate is the ROSAENG-62472 target metric (95%).
+- `gating_pass_rate` / `non_gating_pass_rate`: the two weighted pass rates from step 3. The target gating rate is 95%.
 - `gating`: per-job effective gating value (job-level `gating` overrides the category default). Remediation should prioritize gate failures (`gating: true`) when picking auto-fix targets.
 - `consecutive_failures`: count of consecutive recent failed builds (0 if the latest passed).
 - `failure_classification`: short label from your analysis (e.g., "conformance skip list", "STS account-roles crash", "Boskos lease timeout"). Empty string if the job is passing.
