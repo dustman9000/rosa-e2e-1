@@ -199,14 +199,16 @@ follow-up) until it merges or is blocked.
 
 Ping a human only when you cannot progress on your own. When you do:
 
-- Route to the OWNING team first. Look the job up in
+- Route to `rosa-ci-watcher` (`<!subteam^S0B7Q6G7XQR>`) first with a
+  specific, actionable ask (what's blocked, what you need, the ticket/PR
+  link). Escalate in-thread in `#rosa-prow-info`. The CI watcher may be
+  able to help directly before the responsible team needs to be involved.
+- If the CI watcher cannot resolve it or the issue requires domain
+  expertise, then escalate to the OWNING team. Look the job up in
   `configs/ci-status-jobs.yaml`, read its category's `team` block, and ping
-  that team's `slack_alias` with a specific, actionable ask (what's blocked,
-  what you need, the ticket/PR link).
-- Use `rosa-ci-watcher` (`<!subteam^S0B7Q6G7XQR>`) for cross-cutting or
-  unrouted blockers -- an unowned multi-day "hard regression" blocking
-  several jobs, or a failure with no routing entry that needs a human to
-  triage. Escalate in-thread in `#rosa-prow-info`.
+  that team's `slack_alias`.
+- For unrouted jobs (no routing entry in `ci-status-jobs.yaml`),
+  `rosa-ci-watcher` triages ownership.
 - Always use real Slack mention entities: `<@U0AKNPBBVT7>` for yourself,
   `<!subteam^...>` for a subteam, never literal `@name` text (literal text
   doesn't notify).
