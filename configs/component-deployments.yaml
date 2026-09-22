@@ -58,6 +58,9 @@ components:
     saas_name: saas-sfo-pko
     strategy: hive
     e2e_saas: saas-sfo-prow-e2e
+    canary_targets:
+      - sfo-hivep03uw1
+      - sfo-hivep04ew2
   - key: custom-domains-operator
     saas_name: saas-cdo-pko
     strategy: hive
@@ -109,9 +112,17 @@ components:
   - key: rhobs-synthetics-agent
     saas_name: rhobs-synthetics-agent
     strategy: hive
+    saas_dir: data/services/rhobs/rhobs/cicd
+    canary_namespaces:
+      - rhobsp01ue1
+      - backplanep05ue1
   - key: rhobs-synthetics-api
     saas_name: rhobs-synthetics-api
     strategy: hive
+    saas_dir: data/services/rhobs/rhobs/cicd
+    canary_namespaces:
+      - rhobsp01ue1
+      - backplanep05ue1
   - key: osd-rhobs-rules-and-dashboards
     saas_name: saas-osd-rhobs-rules-and-dashboards
     strategy: hive
