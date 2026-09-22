@@ -22,17 +22,17 @@ var _ = Describe("Management Plane: OCM Role Linkage", labels.High, labels.Posit
 			Skip("AWS_ACCOUNT_ID not set; cannot verify account-specific OCM role linkage")
 		}
 		By(fmt.Sprintf("Verifying an OCM role is linked for AWS account %s (sts_ocm_role)", cfg.AWSAccountID))
-		Expect(verifiers.VerifyOCMRoleLinkedForAccount(conn, cfg.AWSAccountID)).To(Succeed())
+		Expect(verifiers.VerifyOCMRoleLinkedForAccount(ctx, conn, cfg.AWSAccountID)).To(Succeed())
 	})
 
 	It("should have at least one OCM role linked to the organization", func(ctx context.Context) {
 		By("Verifying the organization has an OCM role linked (sts_ocm_role)")
-		Expect(verifiers.VerifyOCMRoleLinked(conn)).To(Succeed())
+		Expect(verifiers.VerifyOCMRoleLinked(ctx, conn)).To(Succeed())
 	})
 
 	It("should expose linked OCM role ARNs", func(ctx context.Context) {
 		By("Resolving the linked OCM role ARNs")
-		arns, err := verifiers.GetLinkedOCMRoleARNs(conn)
+		arns, err := verifiers.GetLinkedOCMRoleARNs(ctx, conn)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(arns).NotTo(BeEmpty(), "expected at least one linked OCM role ARN")
 		for _, a := range arns {
