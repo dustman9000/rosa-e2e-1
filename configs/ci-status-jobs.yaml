@@ -164,7 +164,7 @@ categories:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
       slack_channel: rosa-coffee-focaccia
-      slack_alias: team-rosa-coffee-focaccia
+      slack_alias: team-rosa-coffee
     labels: [ci-failure, ocm-fvt, clusters-service]
     prow_filter: "https://prow.ci.openshift.org/?type=periodic&job=*ocm-fvt-rosa-hcp-staging*"
     jobs:
@@ -208,7 +208,7 @@ categories:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
       slack_channel: rosa-coffee-focaccia
-      slack_alias: team-rosa-coffee-focaccia
+      slack_alias: team-rosa-coffee
     labels: [ci-failure, ocm-fvt, clusters-service]
     prow_filter: "https://prow.ci.openshift.org/?type=periodic&job=*ocm-fvt-rosa-hcp-integration*"
     jobs:
@@ -233,7 +233,7 @@ categories:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
       slack_channel: rosa-coffee-focaccia
-      slack_alias: team-rosa-coffee-focaccia
+      slack_alias: team-rosa-coffee
     labels: [ci-failure, ocm-fvt, clusters-service]
     prow_filter: "https://prow.ci.openshift.org/?type=periodic&job=*ocm-fvt-rosa-hcp-production*"
     jobs:
@@ -249,7 +249,7 @@ categories:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
       slack_channel: rosa-coffee-focaccia
-      slack_alias: team-rosa-coffee-focaccia
+      slack_alias: team-rosa-coffee
     labels: [ci-failure, ocm-fvt, clusters-service]
     prow_filter: "https://prow.ci.openshift.org/?type=periodic&job=*ocm-fvt-rosa-classic-staging*"
     jobs:
@@ -280,7 +280,7 @@ categories:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
       slack_channel: rosa-coffee-focaccia
-      slack_alias: team-rosa-coffee-focaccia
+      slack_alias: team-rosa-coffee
     labels: [ci-failure, ocm-fvt, clusters-service]
     prow_filter: "https://prow.ci.openshift.org/?type=periodic&job=*ocm-fvt-rosa-classic-integration*,*ocm-fvt-osd-aws-integration*"
     jobs:
@@ -300,7 +300,7 @@ categories:
       id: "ec74d716-af36-4b3c-950f-f79213d08f71-3174"
       name: ROSA Coffee Focaccia
       slack_channel: rosa-coffee-focaccia
-      slack_alias: team-rosa-coffee-focaccia
+      slack_alias: team-rosa-coffee
     labels: [ci-failure, ocm-fvt, clusters-service]
     prow_filter: "https://prow.ci.openshift.org/?type=periodic&job=*ocm-fvt-osd-gcp-staging*"
     jobs:
