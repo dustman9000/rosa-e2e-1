@@ -25,6 +25,10 @@ COMPUTE_NODES="${COMPUTE_NODES:-2}"
 COMPUTE_MACHINE_TYPE="${COMPUTE_MACHINE_TYPE:-m5.xlarge}"
 OIDC_CONFIG_ID="${OIDC_CONFIG_ID:-}"
 CLUSTER_SECTOR="${CLUSTER_SECTOR:-}"
+# External authentication (external OIDC / BYO identity provider) is a day-1, immutable HCP feature:
+# it can only be enabled at cluster creation. Set EXTERNAL_AUTH_ENABLED=true to create a cluster that
+# can later host external auth providers via ./scripts/create-external-auth-provider.sh.
+EXTERNAL_AUTH_ENABLED="${EXTERNAL_AUTH_ENABLED:-false}"
 
 # AWS payer/billing account per OCM environment
 # integration/staging: 277304166082 (osd-staging-1) or 811685182089 (osd-staging-2)
@@ -38,6 +42,7 @@ echo "=== ROSA E2E Cluster Provisioning ==="
 echo "Cluster name: ${CLUSTER_NAME}"
 echo "Region: ${REGION}"
 echo "Compute: ${COMPUTE_NODES}x ${COMPUTE_MACHINE_TYPE}"
+echo "External auth: ${EXTERNAL_AUTH_ENABLED}"
 echo ""
 
 # Verify prerequisites
@@ -143,6 +148,14 @@ if [[ -n "${CLUSTER_SECTOR}" ]]; then
   SECTOR_ARGS="--properties provision_shard_id:${PS_ID}"
 fi
 
+# Step 4b: Enable external authentication if requested (day-1, immutable)
+EXTERNAL_AUTH_ARGS=""
+if [[ "${EXTERNAL_AUTH_ENABLED}" == "true" ]]; then
+  echo ""
+  echo "--- External authentication enabled (providers configured post-install) ---"
+  EXTERNAL_AUTH_ARGS="--external-auth-providers-enabled"
+fi
+
 # Step 5: Create cluster
 echo ""
 echo "--- Creating ROSA HCP cluster ---"
@@ -158,6 +171,7 @@ rosa create cluster \
   --oidc-config-id "${OIDC_CONFIG_ID}" \
   --subnet-ids "${SUBNET_IDS}" \
   ${SECTOR_ARGS} \
+  ${EXTERNAL_AUTH_ARGS} \
   --yes
 
 CLUSTER_ID=$(rosa describe cluster -c "${CLUSTER_NAME}" -o json | jq -r '.id')
@@ -174,6 +188,7 @@ export OIDC_CONFIG_ID=${OIDC_CONFIG_ID}
 export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}
 export BILLING_ACCOUNT=${BILLING_ACCOUNT}
 export CLUSTER_SECTOR=${CLUSTER_SECTOR}
+export EXTERNAL_AUTH_ENABLED=${EXTERNAL_AUTH_ENABLED}
 EOF
 
 echo ""
@@ -183,6 +198,12 @@ echo "Env file: ${SHARED_DIR:-/tmp}/rosa-e2e-cluster.env"
 echo ""
 echo "Monitor: rosa logs install -c ${CLUSTER_NAME} --watch"
 echo ""
+if [[ "${EXTERNAL_AUTH_ENABLED}" == "true" ]]; then
+  echo "Add an external auth provider after ready:"
+  echo "  source /tmp/rosa-e2e-cluster.env"
+  echo "  ./scripts/create-external-auth-provider.sh"
+  echo ""
+fi
 echo "Run tests after ready:"
 echo "  source /tmp/rosa-e2e-cluster.env"
 echo "  OCM_TOKEN=\$(ocm token) make test"
