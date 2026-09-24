@@ -199,6 +199,11 @@ categories:
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-zero-egress-upgrade-staging-main
       - name: HCP Access Request
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-access-request-staging-main
+      - name: HCP Sanity
+        prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-sanity-staging-main
+      - name: HCP Sanity Jira
+        prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-sanity-jira-staging-main
+        gating: false  # disabled via openshift/release#85732 (cron set to Feb 31)
       # OCP5
       - name: HCP Access Request OCP5
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-access-request-ocp5-staging-main
@@ -225,6 +230,9 @@ categories:
       - name: HCP Sanity Jira OCP5
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-sanity-jira-ocp5-staging-main
         gating: false  # disabled via openshift/release#85732 (cron set to Feb 31)
+      - name: HCP Resource Cleaner OCP5
+        prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-ocp5-resource-cleaner
+        gating: false  # utility job, not a functional test
       - name: HCP Shared VPC OCP5
         prow_job: periodic-ci-openshift-online-rosa-e2e-main-ocm-fvt-rosa-hcp-staging-ocm-fvt-periodic-cs-rosa-hcp-shared-vpc-ocp5-staging-main
       - name: HCP Upgrade OCP5
