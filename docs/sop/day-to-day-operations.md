@@ -2,11 +2,13 @@
 
 What actually fills the days of whoever's driving ROSA CI Watcher work, beyond the formal runbook steps in [`../ci-watcher/runbook.md`](../ci-watcher/runbook.md).
 
-## The three recurring channels
+## The recurring channels
 
 - **[#wg-rosa-cicd](https://redhat-internal.slack.com/archives/C0ADGRNAT8U)** - the main working channel. Chai-bot's daily health report lands here, CI Watcher handovers post here (automated weekly digest tagging the on-call usergroup with CI health by category, unresolved `#rosa-prow-info` threads needing follow-up, key merges, and open PRs needing review), and it's where you escalate infra/multi-category problems.
 - **[#rosa-prow-info](https://redhat-internal.slack.com/archives/C0AT31ERJLS)** - real-time Prow job result feed. This is where individual failure investigation threads happen, often with `@chai-bot` pulled in directly to get a first-pass diagnosis before a human responds.
 - **[#forum-rosa-support](https://redhat.enterprise.slack.com/archives/CCX9DB894)** - fields access/permissions questions from the wider team: adding people to the `openshift-online` GitHub org or the `rosa-org` GitHub team, confirming org/team membership for new contributors. This is routine, low-effort, but comes up often enough to expect it as part of the job, not a one-off.
+- **[#forum-rosa-deployments](https://redhat.enterprise.slack.com/archives/C081W589GRG)** - bundle release coordination.
+- **[#sre-operators](https://redhat.enterprise.slack.com/archives/CFJD1NZFT)** - SRE operator PR review requests.
 
 ## Triage pattern in practice
 
