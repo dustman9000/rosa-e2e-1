@@ -16,7 +16,7 @@ Don't promote all targets in a saas file to the same SHA at once to "unstick" so
 
 Two different failure modes, don't conflate them:
 
-1. **The gated Prow e2e job actually failed** (real regression or flaky test) - this is a CI triage problem, not a SAPM problem. Follow the normal CI Watcher triage process in `../ci-watcher/`.
+1. **The gated Prow e2e job actually failed** (real regression or flaky test) - this is a CI triage problem, not a SAPM problem. Follow the normal CI Watcher triage process in [`../ci-watcher/`](../ci-watcher/README.md).
 2. **The SAPM PipelineRun itself failed for an infra reason** unrelated to the operator/test code (network blip, transient API failure, or the gangway-bridge race condition below) - this needs a pipeline retrigger.
 
 ### Gangway-bridge race condition
